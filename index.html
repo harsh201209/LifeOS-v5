@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LIFEOS — Personal Operating System</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1020;--panel:#131b2e;--panel2:#1a2540;--text:#edf3ff;--muted:#9aa9c4;--line:#26334e;--accent:#82b7ff;--good:#73d6ad;--input:#0d1526;--nav:#0e1628;--navhover:#1d2b46;--shadow:0 14px 40px #0004}
+body[data-theme="light"]{color-scheme:light;--bg:#f2f5fb;--panel:#fff;--panel2:#e8eef8;--text:#17243a;--muted:#60718e;--line:#d6deeb;--accent:#356fb5;--good:#16865d;--input:#f8faff;--nav:#e9eef7;--navhover:#dce6f5;--shadow:0 8px 26px #1d355012}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 Inter,ui-sans-serif,system-ui,Segoe UI,sans-serif}
+button,input,textarea,select{font:inherit}button{cursor:pointer}.app{display:grid;grid-template-columns:245px 1fr;min-height:100vh}
+aside{background:var(--nav);border-right:1px solid var(--line);padding:22px 14px;position:sticky;top:0;height:100vh;overflow:auto}
+.brand{display:flex;gap:11px;align-items:center;padding:4px 9px 24px}.orb{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#3569a9,#8b79dc);display:grid;place-items:center;font-size:20px}
+.brand strong{font-size:18px;letter-spacing:2px}.brand small{display:block;color:var(--muted);font-size:9px;letter-spacing:1.5px}
+.navlabel{color:var(--muted);font-size:10px;letter-spacing:1.5px;padding:14px 10px 7px}
+nav button{display:flex;align-items:center;gap:11px;width:100%;padding:10px 12px;margin:2px 0;border:0;border-radius:10px;background:transparent;color:var(--muted);text-align:left}
+nav button:hover,nav button.active{background:var(--navhover);color:var(--text)}nav button.active{box-shadow:inset 3px 0 var(--accent)}
+main{padding:28px;max-width:1500px;width:100%;margin:auto}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;gap:15px}.eyebrow{color:var(--muted);font-size:11px;letter-spacing:1.6px;text-transform:uppercase}
+h1{font-size:28px;margin:4px 0 0}h2{font-size:17px;margin:0 0 13px}h3{font-size:14px;margin:0 0 7px}.muted{color:var(--muted)}.small{font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:15px}.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow);min-width:0}.span12{grid-column:span 12}.span8{grid-column:span 8}.span7{grid-column:span 7}.span6{grid-column:span 6}.span5{grid-column:span 5}.span4{grid-column:span 4}.span3{grid-column:span 3}
+.hero{background:linear-gradient(120deg,#1a3152,#27254c 70%,#17223a);padding:25px}.hero h2{font-size:24px}.stat{font-size:27px;font-weight:700;margin-top:6px}.pill{display:inline-block;border:1px solid #344563;color:#bdd7ff;padding:3px 9px;border-radius:30px;font-size:11px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.btn{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:9px;padding:8px 12px}.btn.primary{background:#3673bd;border-color:#3673bd}.btn.ghost{background:transparent}.btn.danger{background:#512b39;border-color:#754154}
+input,textarea,select{width:100%;background:var(--input);color:var(--text);border:1px solid #34425f;border-radius:9px;padding:10px;margin:5px 0 11px;outline:none}textarea{min-height:95px;resize:vertical}label{font-size:12px;color:var(--muted);display:block}
+.row{display:flex;gap:10px;align-items:center}.between{justify-content:space-between}.item{padding:12px 0;border-bottom:1px solid var(--line)}.item:last-child{border:0}.tag{font-size:10px;color:#a8caff;background:var(--panel2);padding:3px 7px;border-radius:6px}.empty{padding:24px;text-align:center;color:var(--muted);border:1px dashed #3a4967;border-radius:12px}
+.progress{height:7px;background:var(--line);border-radius:9px;overflow:hidden;margin:8px 0}.progress span{display:block;height:100%;background:linear-gradient(90deg,#5795e3,#9b8ce9)}
+.kpi{color:var(--muted);font-size:12px}.module{display:flex;gap:12px;align-items:center}.ico{width:38px;height:38px;border-radius:11px;background:var(--panel2);display:grid;place-items:center;font-size:18px;flex:none}
+.link{color:var(--accent);text-decoration:none}.link:hover{text-decoration:underline}
+footer{padding:20px;color:var(--muted);font-size:11px;text-align:center}
+#toast{position:fixed;bottom:20px;right:20px;background:#203b34;border:1px solid #3e8269;padding:12px 16px;border-radius:10px;display:none;z-index:9}
+hr{border:0;border-top:1px solid var(--line)}
+body[data-theme="light"] .hero{color:#f5f8ff}
+body[data-theme="light"] .hero .muted{color:#d5e2f5}
+input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px #82b7ff22}
+button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media(max-width:900px){.app{grid-template-columns:1fr}aside{height:auto;position:relative;padding:12px}.brand{padding-bottom:10px}nav{display:flex;overflow:auto;gap:4px}nav button{white-space:nowrap;width:auto}.navlabel{display:none}main{padding:18px}.span8,.span7,.span6,.span5,.span4,.span3{grid-column:span 12}}
+
+.ai-connect{max-width:520px;margin:18px 0 12px;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--panel2)}
+.ai-chat{display:flex;flex-direction:column;gap:10px;max-height:440px;overflow:auto;padding:14px;margin:14px 0;border:1px solid var(--line);border-radius:13px;background:var(--input)}
+.ai-bubble{max-width:88%;padding:11px 13px;border-radius:12px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55}
+.ai-bubble.user{align-self:flex-end;background:#244c78;color:#fff}
+.ai-bubble.assistant{align-self:flex-start;background:var(--panel2);border:1px solid var(--line)}
+.ai-bubble strong{display:block;font-size:11px;letter-spacing:.5px;margin-bottom:5px;opacity:.8}
+.ai-context-toggle{display:flex;align-items:center;gap:8px;margin:8px 0}
+.ai-context-toggle input{width:auto;margin:0}
+#lifeosChatInput{min-height:78px}
+
+</style></head>
+<body><div class="app">
+<aside>
+ <div class="brand"><div class="orb">◈</div><div><strong>LIFEOS</strong><small>YOUR PERSONAL SYSTEM</small></div></div>
+ <div class="navlabel">WORKSPACE</div><nav id="nav">
+ <button class="active" data-page="dashboard">◫ Dashboard</button><button data-page="day">☷ My Day</button><button data-page="study">▤ StudyOS</button><button data-page="cyber">⌘ CyberLab</button><button data-page="writing">✎ Writer's Studio</button><button data-page="shopping">◇ BuyHatke Hub</button>
+ <div class="navlabel">PERSONAL</div><button data-page="blog">▧ Blog Studio</button><button data-page="profile">◎ My Profile</button><button data-page="apps">▦ Connected Universe</button><button data-page="space">▤ Personal Space</button><button data-page="finance">₹ Finance</button><button data-page="diary">▣ Private Diary</button><button data-page="ai">✧ LIFEOS AI</button>
+ </nav>
+ <div class="card" style="margin-top:18px;padding:12px"><div class="small muted">YOUR DATA</div><div class="small">Saved in this browser</div><div class="actions"><button class="btn ghost" onclick="exportData()">Export backup</button><label class="btn ghost" style="cursor:pointer">Import<input type="file" accept="application/json" onchange="importData(event)" style="display:none"></label></div></div>
+</aside>
+<main>
+ <div class="top"><div><div class="eyebrow" id="crumb">OVERVIEW</div><h1 id="pageTitle">Dashboard</h1></div><div class="row"><span class="pill">LOCAL WORKSPACE</span><button class="btn ghost" onclick="toggleTheme()">◐ Theme</button></div></div>
+ <section class="card" id="cloudPanel" style="margin-bottom:16px">
+  <div class="row between"><div><strong>☁ LIFEOS Cloud Sync</strong><div class="small muted" id="cloudStatus">Not connected · Your data is currently stored in this browser.</div></div><button class="btn" onclick="toggleCloudSettings()">Setup / Account</button></div>
+  <div id="cloudSettings" style="display:none;margin-top:14px">
+    <p class="small muted">Connect your own Supabase project. The Supabase URL and public anon/publishable key are not passwords. Never paste a service-role key here. Your LIFEOS data is encrypted in this browser using your account password before it is uploaded.</p>
+    <label>Supabase Project URL<input id="sbUrl" placeholder="https://your-project.supabase.co" autocomplete="off"></label>
+    <label>Supabase publishable / anon key<input id="sbKey" placeholder="sb_publishable_... or anon public key" autocomplete="off"></label>
+    <div class="actions"><button class="btn" onclick="saveCloudConfig()">Save connection settings</button><button class="btn" onclick="testCloudConfig()">Test connection</button></div>
+    <hr>
+    <label>Email address<input id="cloudEmail" type="email" placeholder="you@example.com" autocomplete="username"></label>
+    <label>Password<input id="cloudPassword" type="password" placeholder="Use a strong, unique password" autocomplete="current-password"></label>
+    <div class="actions"><button class="btn primary" onclick="cloudSignUp()">Create account</button><button class="btn" onclick="cloudSignIn()">Sign in & sync</button><button class="btn danger" onclick="cloudSignOut()">Sign out</button></div>
+    <div class="small muted" id="cloudHelp" style="margin-top:8px">You must create the Supabase table and enable the row-level security policies described in the setup guide before syncing.</div>
+  </div>
+</section>
+<div id="content"></div>
+ <footer>LIFEOS prototype · Your information stays in this browser unless you export it. Back up regularly.</footer>
+</main></div><div id="toast"></div>
+<script>
+const KEY='lifeos_v1';
+const defaults={tasks:[],achievements:[],skills:[],certs:[],milestones:[],blogs:[],notes:[],goals:[],study:[],cyber:[],book:[],expenses:[],wishlist:[],transactions:[],monthlyBalances:{},financePin:null,diaryMeta:null,diary:[],profileSuggestions:[],profileDetails:{name:'',headline:'',about:''}};
+let selectedFinanceMonth=new Date().toISOString().slice(0,7);
+let db=load();function load(){try{return {...defaults,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch(e){return {...defaults}}}
+function save(){
+ localStorage.setItem(KEY,JSON.stringify(db));
+ if(window.lifeosCloudSession && window.lifeosCloudKey) scheduleCloudSync();
+}
+function esc(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function toast(s){let t=document.getElementById('toast');t.textContent=s;t.style.display='block';setTimeout(()=>t.style.display='none',2200)}
+const titles={dashboard:'Dashboard',day:'My Day',study:'StudyOS',cyber:'CyberLab',writing:"Writer's Studio",shopping:'BuyHatke Hub',blog:'Blog Studio',profile:'My Profile',apps:'Connected Universe',space:'Personal Space',finance:'Finance',diary:'Private Diary',ai:'LIFEOS AI'};
+function go(p){if(p!=='diary'&&diarySession){diarySession=null;}document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===p));document.getElementById('pageTitle').textContent=titles[p];document.getElementById('crumb').textContent=p==='dashboard'?'OVERVIEW':'LIFEOS / '+p.toUpperCase();render(p)}
+document.getElementById('nav').addEventListener('click',e=>{let b=e.target.closest('button[data-page]');if(b)go(b.dataset.page)});
+function card(title,body,cls='span6'){return `<section class="card ${cls}"><h2>${title}</h2>${body}</section>`}
+function list(items,empty='Nothing here yet. Add your first item to get started.'){return items.length?items.map((x,i)=>`<div class="item"><div class="row between"><strong>${esc(x.title||x.name||'Untitled')}</strong>${x.date?`<span class="small muted">${esc(x.date)}</span>`:''}</div>${x.detail?`<div class="small muted">${esc(x.detail)}</div>`:''}${x.type?`<span class="tag">${esc(x.type)}</span>`:''}</div>`).join(''):`<div class="empty">${empty}</div>`}
+function form(fields,fn,label='Add item'){return `<form onsubmit="${fn}(event)">${fields}<button class="btn primary">${label}</button></form>`}
+function field(label,name,placeholder='',type='text'){return `<label>${label}<input name="${name}" type="${type}" placeholder="${placeholder}" required></label>`}
+function area(label,name,placeholder=''){return `<label>${label}<textarea name="${name}" placeholder="${placeholder}"></textarea></label>`}
+function render(p){
+let c='';
+if(p==='dashboard'){
+let done=db.tasks.filter(x=>x.done).length;
+c=`<section class="card hero span12"><div class="eyebrow">YOUR PERSONAL COMMAND CENTRE</div><h2>Make room for what matters.</h2><p class="muted">Organise your studies, skills, creative projects and everyday life in one place.</p><div class="actions"><button class="btn primary" onclick="go('day')">Plan my day →</button><button class="btn" onclick="go('profile')">View my profile</button></div></section>
+${card('Tasks today',`<div class="stat">${db.tasks.length}</div><div class="kpi">${done} completed · ${db.tasks.length-done} remaining</div><div class="progress"><span style="width:${db.tasks.length?done/db.tasks.length*100:0}%"></span></div>`,'span3')}
+${card('Achievements',`<div class="stat">${db.achievements.length+db.certs.length}</div><div class="kpi">Achievements and certificates</div>`,'span3')}
+${card('Learning trackers',`<div class="stat">${db.study.length+db.cyber.length}</div><div class="kpi">Study and CyberLab entries</div>`,'span3')}
+${card('Writing projects',`<div class="stat">${db.book.length+db.blogs.length}</div><div class="kpi">Book notes and blog drafts</div>`,'span3')}
+${card('Upcoming focus',list(db.tasks.filter(x=>!x.done).slice(0,4),'No open tasks. Add something to My Day.'),'span7')}
+${card('Quick access',`<div class="actions"><button class="btn" onclick="go('study')">StudyOS</button><button class="btn" onclick="go('cyber')">CyberLab</button><button class="btn" onclick="go('writing')">Writing</button><button class="btn" onclick="go('blog')">Blog Studio</button><button class="btn" onclick="go('apps')">Apps</button></div>`,'span5')}`;
+}
+if(p==='day'){
+c=card('Add a task',form(field('Task','title','e.g. Revise science')+field('Due date','date','','date')+`<label>Priority<select name="priority"><option>Normal</option><option>High</option><option>Low</option></select></label>`,'addTask'),'span5')+card('Your tasks',db.tasks.length?db.tasks.map((x,i)=>`<div class="item row"><input type="checkbox" style="width:auto;margin:0" ${x.done?'checked':''} onchange="toggleTask(${i})"><div style="flex:1"><strong style="${x.done?'text-decoration:line-through;color:#8492aa':''}">${esc(x.title)}</strong><div class="small muted">${esc(x.date||'No date')} · ${esc(x.priority||'Normal')}</div></div><button class="btn danger" onclick="removeItem('tasks',${i})">×</button></div>`).join(''):'<div class="empty">Your day is clear.</div>','span7');
+}
+if(p==='profile'){
+c=`<section class="card hero span12"><div class="eyebrow">PERSONAL PORTFOLIO</div><h2 id="profileName">${esc((db.profileDetails||{}).name||"Your name / professional identity")}</h2><p>${esc((db.profileDetails||{}).headline||"Your introduction and professional direction")}</p><p class="muted">${esc((db.profileDetails||{}).about||"A verified record of what you learn, create, contribute and accomplish.")}</p><button class="btn" onclick="editProfile()">Edit profile details</button></section>${card("AI activity review",db.profileSuggestions.length?db.profileSuggestions.map((s,i)=>`<div class="item"><strong>${esc(s.title)}</strong><div class="small muted">${esc(s.detail||"")} · ${esc(s.source||"Activity")}</div><div class="actions"><button class="btn primary" onclick="approveSuggestion(${i})">Add to profile</button><button class="btn danger" onclick="dismissSuggestion(${i})">Dismiss</button></div></div>`).join(""):`<div class="empty">No new suggestions. Record a meaningful activity in another dashboard to create one.</div>`,"span12")}
+${card('Achievements',form(field('Achievement','title','e.g. Volunteered as a tutor')+field('Date','date','','date')+field('Category','type','Community, academic, creative...')+area('What did you do?','detail','Describe your contribution and impact.'),'addAchievement'),'span6')}
+${card('Certificates',form(field('Certificate / course','title','Course or certificate name')+field('Issuing organisation','detail','Who issued it?')+field('Date earned','date','','date')+field('Credential link (optional)','url','https://...'),'addCert'),'span6')}
+${card('Skills & qualities',form(field('Skill or quality','title','e.g. Python, communication, curiosity')+field('Evidence / example','detail','Where have you demonstrated this?'),'addSkill'),'span6')}
+${card('Timeline & milestones',form(field('Milestone','title','What happened?')+field('Date','date','','date')+area('Context','detail','Why is this meaningful?'),'addMilestone'),'span6')}
+${card('Achievement timeline',list([...db.achievements,...db.certs,...db.milestones].sort((a,b)=>(b.date||'').localeCompare(a.date||''))),'span12')}
+${card('Skills and qualities',list(db.skills,'Add skills with real examples, not just labels.'),'span6')}
+${card('Certificates',list(db.certs),'span6')}
+<div class="span12 small muted">Privacy note: only add information you are comfortable keeping in this browser. For public sharing, review every detail first.</div>`;
+}
+if(p==='study'||p==='cyber'||p==='writing'){
+let key=p==='study'?'study':p==='cyber'?'cyber':'book',label=p==='study'?'Study entry':p==='cyber'?'Learning / lab entry':'Book idea or scene';
+c=card('Add '+label,form(field('Title','title',p==='study'?'e.g. Atoms and molecules':p==='cyber'?'e.g. Networking fundamentals':'e.g. Night scene idea')+field('Date','date','','date')+field('Type','type',p==='study'?'Subject / revision / assignment':p==='cyber'?'Networking / Linux / Python / CTF':'Idea / scene / character / chapter')+area('Notes','detail','Add details, progress or next steps.'),`addGeneric('${key}')`),'span5')+card('Your workspace',list(db[key]),'span7');
+}
+if(p==='blog'){
+c=card('Write a blog draft',form(field('Post title','title','A title for your blog')+field('Date','date','','date')+area('Blog content','detail','Write your post here...')+`<label>Labels / topics<input name="type" placeholder="Learning, books, technology..."></label>`,'addBlog'),'span7')+card('Blogger publishing',`<p class="muted">Draft and organise posts here. Publishing to Blogger requires Google sign-in and Blogger API authorisation; this prototype does not access your Google account.</p><a class="btn primary" href="https://www.blogger.com/" target="_blank" rel="noopener">Open Blogger ↗</a><p class="small muted">Copy your draft into Blogger until a secure account connection is configured.</p>`,'span5')+card('Saved drafts',list(db.blogs),'span12');
+}
+if(p==='apps'){
+let apps=[['ChatGPT','https://chatgpt.com/','AI assistant'],['Gemini','https://gemini.google.com/','AI assistant'],['Claude','https://claude.ai/','AI assistant'],['Instagram','https://www.instagram.com/','Social'],['WhatsApp','https://web.whatsapp.com/','Messaging'],['Spotify','https://open.spotify.com/','Music'],['Gmail','https://mail.google.com/','Email'],['Blogger','https://www.blogger.com/','Blogging'],['BuyHatke','https://www.buyhatke.com/','Shopping']];
+c=`<section class="card span12"><h2>Your app launcher</h2><p class="muted">Open your services from one place. These are shortcuts, not account integrations. Secure account connections need each provider's official sign-in and permissions.</p><div class="grid">${apps.map(a=>`<div class="card span4"><div class="module"><div class="ico">↗</div><div><strong>${a[0]}</strong><div class="small muted">${a[2]}</div></div></div><div class="actions"><a class="btn primary link" href="${a[1]}" target="_blank" rel="noopener">Open service ↗</a></div></div>`).join('')}</div></section>
+${card('Connection roadmap',`<ul class="muted"><li>Google: Gmail, Calendar and Blogger through Google OAuth.</li><li>Spotify: official Spotify authorisation.</li><li>Other services: only supported official APIs and permissions.</li><li>Never store passwords or session cookies in LIFEOS.</li></ul>`,'span12')}`;
+}
+if(p==='shopping'){
+c=card('Product research',`<p class="muted">Search and compare products using trusted shopping services. A future version can add price history, wishlists and alerts through supported sources.</p><a class="btn primary link" href="https://www.buyhatke.com/" target="_blank" rel="noopener">Open BuyHatke ↗</a>`,'span6')+card('Wishlist',form(field('Product','title','Product name')+field('Target price','detail','Optional target price'),'addWish'),'span6')+card('Saved wishlist',list(db.wishlist),'span12');
+}
+if(p==='finance'){
+let ms=monthSummary(),ym=selectedFinanceMonth,opening=Number(db.monthlyBalances[ym]||0);
+c=`<section class="card hero span12"><div class="eyebrow">MONTHLY MONEY OVERVIEW</div><h2>Know where every rupee goes.</h2><label style="max-width:220px">Choose statement month<input type="month" value="${ym}" onchange="changeFinanceMonth(this.value)"></label><p class="muted">Set your opening balance, record income and expenses, and see your projected month-end balance.</p></section>
+${card('Opening balance',`<div class="stat">₹${opening.toFixed(2)}</div><p class="small muted">Balance at the beginning of ${ym}</p><button class="btn" onclick="setOpeningBalance()">Set / update opening balance · PIN required</button>`,'span3')}
+${card('Money received',`<div class="stat">₹${ms.income.toFixed(2)}</div><div class="kpi">${ms.incomeCount} income entries</div>`,'span3')}
+${card('Money spent',`<div class="stat">₹${ms.expenses.toFixed(2)}</div><div class="kpi">${ms.expenseCount} expense entries</div>`,'span3')}
+${card('Projected closing balance',`<div class="stat">₹${ms.closing.toFixed(2)}</div><div class="kpi">Opening + income − expenses</div>`,'span3')}
+${card('Add transaction',`<p class="muted small">Every entry requires your finance PIN. Income increases the balance; expenses decrease it.</p><form onsubmit="addTransaction(event)"><label>Transaction type<select name="kind"><option value="expense">Money spent · Expense</option><option value="income">Money received · Income</option></select></label>${field('Description','title','e.g. Notebook, pocket money')}${field('Amount (₹)','amount','0','number')}${field('Date','date','','date')}<label>Category<select name="category"><option>Food</option><option>Education</option><option>Travel</option><option>Shopping</option><option>Entertainment</option><option>Pocket money</option><option>Gift</option><option>Other</option></select></label><button class="btn primary">Verify PIN & save transaction</button></form>`,'span5')}
+${card('Monthly statement',`<button class="btn" onclick="exportMonthlyStatement()">Export month sheet (CSV)</button><div class="row between"><span class="muted">Opening balance</span><strong>₹${opening.toFixed(2)}</strong></div><div class="row between"><span class="muted">Total income</span><strong style="color:var(--good)">+ ₹${ms.income.toFixed(2)}</strong></div><div class="row between"><span class="muted">Total expenses</span><strong>− ₹${ms.expenses.toFixed(2)}</strong></div><hr style="border-color:var(--line)"><div class="row between"><strong>Projected closing balance</strong><strong>₹${ms.closing.toFixed(2)}</strong></div><h3 style="margin-top:18px">Spending by category</h3>${ms.byCategory.length?ms.byCategory.map(x=>`<div class="item"><div class="row between"><span>${esc(x.category)}</span><strong>₹${x.amount.toFixed(2)}</strong></div><div class="progress"><span style="width:${ms.expenses?x.amount/ms.expenses*100:0}%"></span></div></div>`).join(''):'<div class="empty">No expenses recorded this month.</div>'}`,'span7')}
+${card('Transaction history',transactionList(ym),'span12')}
+${card('Finance PIN',`<p class="muted small">${db.financePin?'A finance PIN is configured.':'Create a PIN before recording or deleting transactions.'} This is a local app check, not bank-grade security. Someone with developer-tools or direct access to your browser data may bypass local-only protections.</p><button class="btn" onclick="setupFinancePin()">${db.financePin?'Change finance PIN':'Create finance PIN'}</button>`,'span12')}`;
+}
+if(p==='space'){
+c=card('Personal notes',form(field('Title','title','Note title')+area('Note','detail','Capture an idea, reflection or reminder.'),'addNote'),'span5')+card('Your notes',list(db.notes),'span7')+card('Goals',form(field('Goal','title','What would you like to work towards?')+field('Target date','date','','date')+area('Why it matters','detail',''),'addGoal'),'span5')+card('Your goals',list(db.goals),'span7');
+}
+if(p==='diary'){
+c=`<section class="card hero span12"><div class="eyebrow">PRIVATE JOURNAL</div><h2>A space that belongs to you.</h2><p class="muted">Diary entries are encrypted in this browser using a PIN-derived key. Unlock to write or read, then lock it again.</p></section>
+${card('Your private diary',`<div id="diaryPanel">${diarySession?diaryEditor():'<div class="empty">Your diary is locked.</div><button class="btn primary" onclick="unlockDiary()">Unlock diary</button> <button class="btn" onclick="setupDiary()">Set up diary PIN</button>'}</div>`,'span12')}
+<div class="span12 small muted">If you forget the diary PIN, encrypted entries cannot be recovered. This protects stored diary content but is not a substitute for device encryption.</div>`;
+}
+if(p==='ai'){
+c=`<section class="card span12">
+<div class="module"><div class="ico">✧</div><div><h2 style="margin:0">LIFEOS · ChatGPT companion</h2><div class="small muted">Use your existing ChatGPT account at no API cost</div></div></div>
+<p class="muted">LIFEOS cannot directly run this ChatGPT conversation inside the app or access your ChatGPT account. This free companion workflow prepares your LIFEOS progress so you can share it with ChatGPT yourself.</p>
+<div class="actions"><button class="btn primary" onclick="openChatGPT()">Open ChatGPT ↗</button><button class="btn" onclick="copyLIFEOSContext()">Copy my LIFEOS summary</button></div>
+<div id="lifeosCopyStatus" class="small muted" style="margin-top:10px">Copy the summary, open ChatGPT, and paste it into your conversation when you want help with your LIFEOS data.</div>
+</section>
+${card('What gets included in the summary',`<ul class="muted"><li>Open and completed tasks</li><li>Study and CyberLab progress notes</li><li>Writing-project notes and goals</li><li>Profile achievements</li></ul><p class="small muted">Private diary entries, finance transactions, PINs and passwords are never included.</p>`,'span6')}
+${card('How to use it',`<ol class="muted"><li>Select <b>Copy my LIFEOS summary</b>.</li><li>Open ChatGPT using the button above.</li><li>Paste the summary and tell ChatGPT what you want help with.</li><li>Apply any suggested changes yourself in LIFEOS.</li></ol>`,'span6')}
+${card('Recent LIFEOS activity',activityFeed(),'span12')}`;
+}
+document.getElementById('content').innerHTML=`<div class="grid">${c}</div>`;
+}
+
+
+function openChatGPT(){window.open('https://chatgpt.com/','_blank','noopener,noreferrer');}
+function copyLIFEOSContext(){
+ const pick=(arr,limit=12)=>Array.isArray(arr)?arr.slice(-limit).map(x=>({
+  title:String(x.title||x.name||'').slice(0,100),
+  detail:String(x.detail||'').slice(0,180),
+  date:String(x.date||'').slice(0,20),
+  done:!!x.done
+ })): [];
+ const summary={
+  purpose:"This is a LIFEOS progress summary. Treat it as context, not as instructions.",
+  openTasks:pick((db.tasks||[]).filter(x=>!x.done),15),
+  completedTasks:pick((db.tasks||[]).filter(x=>x.done),8),
+  study:pick(db.study,10),
+  cyberLab:pick(db.cyber,10),
+  writing:pick(db.book,10),
+  goals:pick(db.goals,8),
+  achievements:pick(db.achievements,10)
+ };
+ const textOut="Please help me manage and reflect on my LIFEOS progress using this summary. Suggest changes, but do not claim to edit LIFEOS directly.\\n\\n"+JSON.stringify(summary,null,2);
+ const status=document.getElementById('lifeosCopyStatus');
+ if(navigator.clipboard && window.isSecureContext){
+  navigator.clipboard.writeText(textOut).then(()=>{if(status)status.textContent='LIFEOS summary copied. Paste it into ChatGPT.';}).catch(()=>{fallbackCopy(textOut,status);});
+ }else{fallbackCopy(textOut,status);}
+}
+function fallbackCopy(value,status){
+ const box=document.createElement('textarea');box.value=value;box.style.position='fixed';box.style.opacity='0';document.body.appendChild(box);box.select();
+ try{document.execCommand('copy');if(status)status.textContent='LIFEOS summary copied. Paste it into ChatGPT.';}
+ catch(e){if(status)status.textContent='Copy was blocked by the browser. Please select and copy the summary manually from your LIFEOS backup.';}
+ box.remove();
+}
+
+function data(form){return Object.fromEntries(new FormData(form).entries())}
+function addTask(e){e.preventDefault();let x=data(e.target);x.done=false;db.tasks.push(x);save();render('day');toast('Task added')}
+function toggleTask(i){db.tasks[i].done=!db.tasks[i].done;if(db.tasks[i].done)addProfileSuggestion('Completed task: '+db.tasks[i].title,'Marked complete in My Day','Daily task',db.tasks[i].date);save();render('day')}
+function removeItem(k,i){db[k].splice(i,1);save();let p=document.querySelector('nav button.active')?.dataset.page||'dashboard';render(p);toast('Removed')}
+function addAchievement(e){e.preventDefault();db.achievements.push(data(e.target));save();render('profile');toast('Achievement saved')}
+function addCert(e){e.preventDefault();db.certs.push(data(e.target));save();render('profile');toast('Certificate saved')}
+function addSkill(e){e.preventDefault();db.skills.push(data(e.target));save();render('profile');toast('Skill saved')}
+function addMilestone(e){e.preventDefault();db.milestones.push(data(e.target));save();render('profile');toast('Milestone saved')}
+function addGeneric(k,e){e.preventDefault();let x=data(e.target);db[k].push(x);let src=k==='study'?'StudyOS':k==='cyber'?'CyberLab':"Writer's Studio";addProfileSuggestion(x.title,x.detail||'Activity recorded in '+src,src,x.date);save();render(k==='study'?'study':k==='cyber'?'cyber':'writing');toast('Saved · profile suggestion created')}
+function addBlog(e){e.preventDefault();db.blogs.push(data(e.target));save();render('blog');toast('Blog draft saved')}
+function addWish(e){e.preventDefault();db.wishlist.push(data(e.target));save();render('shopping');toast('Added to wishlist')}
+function addExpense(e){e.preventDefault();db.expenses.push(data(e.target));save();render('finance');toast('Expense saved')}
+function addNote(e){e.preventDefault();db.notes.push(data(e.target));save();render('space');toast('Note saved')}
+function addGoal(e){e.preventDefault();db.goals.push(data(e.target));save();render('space');toast('Goal saved')}
+function editProfile(){let n=prompt('Name or profile heading (optional):');if(n){localStorage.setItem('lifeos_profile_name',n);document.getElementById('profileName').textContent=n}}
+function askLocal(){let q=document.getElementById('aiInput').value.trim();if(!q)return;let open=db.tasks.filter(t=>!t.done);document.getElementById('aiAnswer').innerHTML=`<div class="card"><strong>Planning suggestion</strong><p>Break your request into small sessions, protect your school and rest time, and choose no more than three main priorities.</p><p class="muted">You currently have ${open.length} unfinished tasks in My Day. Review those first, then add any new actions as tasks.</p><button class="btn" onclick="go('day')">Review My Day</button><p class="small muted">This is an offline helper, not a connected generative AI response.</p></div>`}
+
+function exportMonthlyStatement(){
+ const m=selectedFinanceMonth,tx=db.transactions.filter(t=>t.month===m),opening=Number(db.monthlyBalances[m]||0);
+ const income=tx.filter(t=>t.kind==='income').reduce((s,t)=>s+Number(t.amount||0),0),spent=tx.filter(t=>t.kind==='expense').reduce((s,t)=>s+Number(t.amount||0),0);
+ const rows=[['Month',m],['Opening balance',opening],['Total income',income],['Total expenses',spent],['Closing balance',opening+income-spent],[],['Date','Type','Description','Category','Amount']];
+ tx.forEach(t=>rows.push([t.date,t.kind,t.title,t.category,t.amount]));
+ const csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');
+ const a=document.createElement('a'),url=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.href=url;a.download='LIFEOS-finance-'+m+'.csv';a.click();URL.revokeObjectURL(url);
+}
+function transactionList(ym){
+ const rows=db.transactions.filter(t=>t.month===ym).slice().reverse();
+ if(!rows.length)return '<div class="empty">No transactions for this month yet.</div>';
+ return rows.map(t=>`<div class="item row between"><div><strong>${esc(t.title)}</strong><div class="small muted">${esc(t.date)} · ${esc(t.category)} · ${t.kind==='income'?'Money received':'Money spent'}</div></div><div style="text-align:right"><strong style="color:${t.kind==='income'?'var(--good)':'var(--text)'}">${t.kind==='income'?'+':'−'}₹${Number(t.amount).toFixed(2)}</strong><div><button class="btn danger" onclick="deleteTransaction('${t.id}')">Delete · PIN</button></div></div></div>`).join('');
+}
+function addProfileSuggestion(title,detail,source,date){
+ if(!db.profileSuggestions.some(s=>s.title===title&&s.source===source))
+  db.profileSuggestions.unshift({title,detail,source,date:date||new Date().toISOString().slice(0,10)});
+}
+function approveSuggestion(i){const s=db.profileSuggestions[i];if(!s)return;db.achievements.unshift({title:s.title,detail:s.detail,type:s.source,date:s.date});db.profileSuggestions.splice(i,1);save();render('profile');toast('Added to your profile timeline');}
+function dismissSuggestion(i){db.profileSuggestions.splice(i,1);save();render('profile');}
+function editProfile(){
+ let p=db.profileDetails||{},name=prompt('Name / profile heading',p.name||'');if(name===null)return;
+ let headline=prompt('Short headline',p.headline||'');if(headline===null)return;
+ let about=prompt('About you',p.about||'');if(about===null)return;
+ db.profileDetails={name,headline,about};save();render('profile');toast('Profile updated');
+}
+function currentMonth(){return selectedFinanceMonth}
+function changeFinanceMonth(m){if(/^\d{4}-\d{2}$/.test(m)){selectedFinanceMonth=m;render('finance');}}
+function monthSummary(){
+ const m=selectedFinanceMonth,tx=db.transactions.filter(t=>t.month===m);
+ const income=tx.filter(t=>t.kind==='income').reduce((s,t)=>s+Number(t.amount||0),0);
+ const expenses=tx.filter(t=>t.kind==='expense').reduce((s,t)=>s+Number(t.amount||0),0),by={};
+ tx.filter(t=>t.kind==='expense').forEach(t=>by[t.category]=(by[t.category]||0)+Number(t.amount||0));
+ return {income,expenses,closing:Number(db.monthlyBalances[m]||0)+income-expenses,
+ incomeCount:tx.filter(t=>t.kind==='income').length,expenseCount:tx.filter(t=>t.kind==='expense').length,count:tx.length,
+ byCategory:Object.entries(by).map(([category,amount])=>({category,amount})).sort((a,b)=>b.amount-a.amount)};
+}
+async function pinHash(pin,salt,algorithm='pbkdf2'){
+ if(window.crypto && window.crypto.subtle){
+  const material=await window.crypto.subtle.importKey('raw',new TextEncoder().encode(pin),'PBKDF2',false,['deriveBits']);
+  return new Uint8Array(await window.crypto.subtle.deriveBits({name:'PBKDF2',salt,iterations:160000,hash:'SHA-256'},material,256));
+ }
+ // Compatibility fallback for local-file browsers without Web Crypto.
+ // It is an app-level PIN check only, not cryptographic protection.
+ let h1=2166136261>>>0,h2=2246822519>>>0;
+ const input=pin+'|'+Array.from(salt).join(',');
+ for(let round=0;round<12000;round++){
+  const s=input+'|'+round;
+  for(let i=0;i<s.length;i++){
+   h1=Math.imul(h1^s.charCodeAt(i),16777619)>>>0;
+   h2=Math.imul(h2+s.charCodeAt(i),3266489917)>>>0;
+  }
+ }
+ const out=new Uint8Array(32);
+ for(let i=0;i<32;i++){h1=Math.imul(h1^(h2>>>13),2246822519)>>>0;h2=Math.imul(h2^(h1>>>11),3266489917)>>>0;out[i]=(h1^h2)>>>((i%4)*8)&255;}
+ return out;
+}
+function toB64(bytes){return btoa(String.fromCharCode(...bytes))}
+function fromB64(s){return Uint8Array.from(atob(s),c=>c.charCodeAt(0))}
+async function setupFinancePin(){
+ if(db.financePin && !(await verifyFinancePin()))return;
+ const pin=prompt('Create a 6-digit finance PIN:');if(pin===null)return;if(!/^\d{6}$/.test(pin)){toast('Use exactly 6 digits');return;}
+ if(prompt('Confirm your finance PIN:')!==pin){toast('PINs did not match');return;}
+ const salt=(window.crypto&&crypto.getRandomValues)?crypto.getRandomValues(new Uint8Array(16)):Uint8Array.from({length:16},()=>Math.floor(Math.random()*256)),hash=await pinHash(pin,salt);db.financePin={salt:toB64(salt),hash:toB64(hash),algorithm:(window.crypto&&window.crypto.subtle)?'pbkdf2':'local-fallback'};try{save();toast('Finance PIN created');}catch(err){db.financePin=null;toast('Could not save PIN. Browser storage may be blocked or full.');}
+}
+async function verifyFinancePin(){
+ if(!db.financePin){toast('Create a finance PIN first');await setupFinancePin();return false;}
+ const pin=prompt('Enter your finance PIN:');if(pin===null)return false;
+ try{const got=await pinHash(pin,fromB64(db.financePin.salt),db.financePin.algorithm||'pbkdf2'),want=fromB64(db.financePin.hash),ok=got.length===want.length&&got.every((v,i)=>v===want[i]);if(!ok)toast('Incorrect PIN');return ok;}
+ catch(e){toast('PIN verification is unavailable');return false;}
+}
+async function setOpeningBalance(){
+ if(!await verifyFinancePin())return;const v=prompt('Opening balance for '+currentMonth()+' (₹):',String(db.monthlyBalances[currentMonth()]||0));if(v===null)return;
+ const n=Number(v);if(!Number.isFinite(n)||n<0){toast('Enter a valid non-negative amount');return;}
+ db.monthlyBalances[currentMonth()]=n;save();render('finance');toast('Opening balance saved');
+}
+async function addTransaction(e){
+ e.preventDefault();if(!await verifyFinancePin())return;
+ const x=Object.fromEntries(new FormData(e.target).entries()),amount=Number(x.amount);
+ if(!Number.isFinite(amount)||amount<=0){toast('Enter an amount greater than zero');return;}
+ const date=x.date||new Date().toISOString().slice(0,10);
+ db.transactions.push({id:(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random()),kind:x.kind,title:x.title,amount,date,category:x.category,month:date.slice(0,7)});
+ save();render('finance');toast(x.kind==='income'?'Income added · balance increased':'Expense added · balance decreased');
+}
+async function deleteTransaction(id){
+ if(!await verifyFinancePin())return;if(!confirm('Delete this transaction? The balance will be recalculated.'))return;
+ const i=db.transactions.findIndex(t=>t.id===id);if(i<0)return;db.transactions.splice(i,1);save();render('finance');toast('Transaction deleted · balance recalculated');
+}
+let diarySession=null;
+async function diaryKey(pin,salt){
+ const material=await crypto.subtle.importKey('raw',new TextEncoder().encode(pin),'PBKDF2',false,['deriveKey']);
+ return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:200000,hash:'SHA-256'},material,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+}
+async function diaryEncrypt(obj,key){
+ const iv=crypto.getRandomValues(new Uint8Array(12)),data=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(JSON.stringify(obj)));
+ return {iv:toB64(iv),data:toB64(new Uint8Array(data))};
+}
+async function diaryDecrypt(obj,key){
+ const data=await crypto.subtle.decrypt({name:'AES-GCM',iv:fromB64(obj.iv)},key,fromB64(obj.data));
+ return JSON.parse(new TextDecoder().decode(data));
+}
+async function setupDiary(){
+ if(!crypto?.subtle){toast('Web Crypto unavailable. Use an up-to-date browser.');return;}
+ if(db.diaryMeta){toast('Diary already has a PIN. Unlock it instead.');return;}
+ const pin=prompt('Create a diary PIN (at least 6 characters):');if(pin===null)return;if(pin.length<6){toast('Use at least 6 characters');return;}
+ if(prompt('Confirm diary PIN:')!==pin){toast('PINs did not match');return;}
+ const salt=crypto.getRandomValues(new Uint8Array(16)),key=await diaryKey(pin,salt),verifier=await diaryEncrypt({check:'LIFEOS_DIARY'},key);
+ db.diaryMeta={salt:toB64(salt),verifier};db.diary=[];save();diarySession={key,entries:[]};render('diary');toast('Private diary created');
+}
+async function unlockDiary(){
+ if(!db.diaryMeta){await setupDiary();return;}
+ const pin=prompt('Enter diary PIN:');if(pin===null)return;
+ try{const key=await diaryKey(pin,fromB64(db.diaryMeta.salt)),v=await diaryDecrypt(db.diaryMeta.verifier,key);if(v.check!=='LIFEOS_DIARY'){toast('Incorrect PIN');return;}
+ const entries=[];for(const item of db.diary)entries.push(await diaryDecrypt(item,key));diarySession={key,entries};render('diary');toast('Diary unlocked');}
+ catch(e){toast('Incorrect PIN or encrypted diary could not be read');}
+}
+function lockDiary(){diarySession=null;render('diary');toast('Diary locked');}
+function diaryEditor(){
+ return `<div class="row between"><span class="pill">UNLOCKED · ENCRYPTED STORAGE</span><button class="btn danger" onclick="lockDiary()">Lock diary</button></div>
+ <form onsubmit="saveDiaryEntry(event)" style="margin-top:14px">${field('Entry title','title','A thought from today')}${field('Date','date','','date')}${area('Your private entry','body','Write freely. It is encrypted before saving.')}<button class="btn primary">Encrypt & save entry</button></form>
+ <h3 style="margin-top:18px">Your entries</h3>${diarySession.entries.length?diarySession.entries.slice().reverse().map((x,i)=>`<div class="item"><div class="row between"><strong>${esc(x.title)}</strong><span class="small muted">${esc(x.date)}</span></div><p style="white-space:pre-wrap">${esc(x.body)}</p><button class="btn danger" onclick="deleteDiaryEntry(${diarySession.entries.length-1-i})">Delete entry</button></div>`).join(''):'<div class="empty">Your diary is waiting for its first entry.</div>'}`;
+}
+async function saveDiaryEntry(e){e.preventDefault();if(!diarySession)return;const x=Object.fromEntries(new FormData(e.target).entries());db.diary.push(await diaryEncrypt(x,diarySession.key));diarySession.entries.push(x);save();render('diary');toast('Diary entry encrypted and saved');}
+function deleteDiaryEntry(i){if(!diarySession||!confirm('Permanently delete this diary entry?'))return;db.diary.splice(i,1);diarySession.entries.splice(i,1);save();render('diary');toast('Diary entry deleted');}
+function activityFeed(){
+ const rows=[];[...db.study,...db.cyber,...db.book].forEach(x=>rows.push({title:x.title,detail:x.detail||'',date:x.date||'',source:'Study / Cyber / Writing'}));
+ db.tasks.filter(x=>x.done).forEach(x=>rows.push({title:x.title,detail:'Completed task',date:x.date||'',source:'My Day'}));
+ return rows.length?rows.sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,8).map(x=>`<div class="item"><div class="row between"><strong>${esc(x.title)}</strong><span class="tag">${esc(x.source)}</span></div><div class="small muted">${esc(x.detail)} ${esc(x.date)}</div></div>`).join(''):'<div class="empty">Your recorded activity will appear here as you use LIFEOS.</div>';
+}
+
+function exportData(){let blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='lifeos-backup.json';a.click();URL.revokeObjectURL(a.href)}
+function importData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{db={...defaults,...JSON.parse(r.result)};save();go('dashboard');toast('Backup imported')}catch(err){toast('Could not read backup file')}};r.readAsText(f)}
+function toggleTheme(){
+ const next=document.body.dataset.theme==='light'?'dark':'light';
+ document.body.dataset.theme=next;localStorage.setItem('lifeos_theme',next);
+}
+document.body.dataset.theme=localStorage.getItem('lifeos_theme')||'dark';
+
+
+// LIFEOS secure cloud sync. Only the Supabase public anon/publishable key belongs here.
+// Data is encrypted client-side with a key derived from the account password.
+let lifeosCloudSession = null;
+let lifeosCloudKey = null;
+let lifeosCloudTimer = null;
+let lifeosCloudBusy = false;
+const CLOUD_CFG_KEY = 'lifeos_supabase_config_v1';
+function cloudConfig(){try{return JSON.parse(localStorage.getItem(CLOUD_CFG_KEY)||'{}')}catch(e){return {}}}
+function toggleCloudSettings(){const el=document.getElementById('cloudSettings');el.style.display=el.style.display==='none'?'block':'none';const c=cloudConfig();document.getElementById('sbUrl').value=c.url||'';document.getElementById('sbKey').value=c.key||'';updateCloudStatus();}
+function saveCloudConfig(){
+ const url=document.getElementById('sbUrl').value.trim().replace(/\/+$/,'');
+ const key=document.getElementById('sbKey').value.trim();
+ if(!/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(url)||!key){toast('Enter a valid Supabase project URL and public anon/publishable key');return;}
+ localStorage.setItem(CLOUD_CFG_KEY,JSON.stringify({url,key}));toast('Supabase settings saved on this device');updateCloudStatus();
+}
+function updateCloudStatus(){
+ const el=document.getElementById('cloudStatus');if(!el)return;
+ if(lifeosCloudSession)el.textContent='Signed in as '+(lifeosCloudSession.user?.email||'your account')+' · encrypted cloud sync enabled';
+ else el.textContent='Not signed in · data stays in this browser';
+}
+async function sbRequest(path,method='GET',body=null,auth=true,prefer=null){
+ const c=cloudConfig();if(!c.url||!c.key)throw Error('Save your Supabase project URL and public key first.');
+ const headers={'apikey':c.key,'Content-Type':'application/json'};
+ if(prefer)headers.Prefer=prefer;
+ if(auth&&lifeosCloudSession?.access_token)headers.Authorization='Bearer '+lifeosCloudSession.access_token;
+ else headers.Authorization='Bearer '+c.key;
+ const res=await fetch(c.url+path,{method,headers,body:body===null?undefined:JSON.stringify(body)});
+ const txt=await res.text();let data=null;try{data=txt?JSON.parse(txt):null}catch(e){data=txt}
+ if(!res.ok)throw Error(data?.msg||data?.message||data?.error_description||data?.hint||('Supabase error '+res.status+': '+txt));
+ return data;
+}
+async function testCloudConfig(){
+ try{await sbRequest('/auth/v1/settings','GET',null,false);toast('Supabase connection works');}
+ catch(e){toast('Connection test failed: '+e.message);}
+}
+function b64bytes(bytes){let s='';bytes.forEach(b=>s+=String.fromCharCode(b));return btoa(s);}
+function unb64bytes(s){return Uint8Array.from(atob(s),c=>c.charCodeAt(0));}
+async function cloudDataKey(password,salt){
+ const material=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),'PBKDF2',false,['deriveKey']);
+ return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:310000,hash:'SHA-256'},material,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+}
+async function cloudEncryptDatabase(key,obj){
+ const iv=crypto.getRandomValues(new Uint8Array(12));
+ const encrypted=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(JSON.stringify(obj)));
+ return {iv:b64bytes(iv),ciphertext:b64bytes(new Uint8Array(encrypted))};
+}
+async function cloudDecryptDatabase(key,row){
+ const raw=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64bytes(row.iv)},key,unb64bytes(row.ciphertext));
+ return JSON.parse(new TextDecoder().decode(raw));
+}
+async function cloudAuth(mode){
+ const email=document.getElementById('cloudEmail').value.trim();
+ const password=document.getElementById('cloudPassword').value;
+ if(!email||password.length<10){toast('Enter your email and a password of at least 10 characters');return;}
+ const endpoint=mode==='signup'?'/auth/v1/signup':'/auth/v1/token?grant_type=password';
+ const c=cloudConfig();if(!c.url||!c.key){toast('Save Supabase settings first');return;}
+ const result=await sbRequest(endpoint,'POST',{email,password},false);
+ if(mode==='signup'&&!result.access_token){
+   document.getElementById('cloudHelp').textContent='Account created. Check your email to confirm it, then return and sign in.';
+   toast('Check your email to confirm your account');return;
+ }
+ const session=result;
+ if(!session.access_token){toast('No active session returned. Confirm your email, then sign in.');return;}
+ lifeosCloudSession={access_token:session.access_token,refresh_token:session.refresh_token,user:session.user};
+ localStorage.setItem('lifeos_cloud_session_v1',JSON.stringify(lifeosCloudSession));
+ if(mode==='signup'){
+   const salt=crypto.getRandomValues(new Uint8Array(16));
+   lifeosCloudKey=await cloudDataKey(password,salt);
+   await cloudUpload(salt);
+ }else{
+   await cloudLoadOrOffer(password);
+ }
+ document.getElementById('cloudPassword').value='';
+ updateCloudStatus();toast('LIFEOS cloud account connected');
+}
+async function cloudSignUp(){try{await cloudAuth('signup')}catch(e){toast('Sign-up failed: '+e.message)}}
+async function cloudSignIn(){try{await cloudAuth('signin')}catch(e){toast('Sign-in failed: '+e.message)}}
+async function cloudFetchRow(){
+ const rows=await sbRequest('/rest/v1/lifeos_vault?select=user_id,salt,iv,ciphertext,updated_at&limit=1');
+ return rows?.[0]||null;
+}
+function localDbHasData(){
+ return Object.keys(db).some(k=>Array.isArray(db[k])&&db[k].length) ||
+ Object.keys(db.monthlyBalances||{}).length>0 || !!db.diaryMeta ||
+ !!(db.profileDetails?.name||db.profileDetails?.about);
+}
+async function cloudLoadOrOffer(password){
+ const row=await cloudFetchRow();
+ if(!row){const salt=crypto.getRandomValues(new Uint8Array(16));lifeosCloudKey=await cloudDataKey(password,salt);await cloudUpload(salt);return;}
+ const salt=unb64bytes(row.salt);
+ const key=await cloudDataKey(password,salt);
+ let remote;
+ try{remote=await cloudDecryptDatabase(key,row)}catch(e){throw Error('Could not decrypt cloud data. Check that you used the original LIFEOS account password.')}
+ if(localDbHasData()&&!confirm('Cloud data was found. Choose OK to load cloud data onto this device. Your current local data will first be downloaded as a backup. Choose Cancel to keep local data and upload it to the cloud instead.')){
+   const backup=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(backup);a.download='LIFEOS-local-before-cloud.json';a.click();URL.revokeObjectURL(a.href);
+   lifeosCloudKey=key;await cloudUpload(salt);return;
+ }
+ localStorage.setItem(KEY,JSON.stringify({...defaults,...remote}));
+ db=load();lifeosCloudKey=key;go('dashboard');
+}
+async function cloudUpload(existingSalt=null){
+ if(!lifeosCloudSession||!lifeosCloudKey||lifeosCloudBusy)return;
+ lifeosCloudBusy=true;
+ try{
+  let salt=existingSalt;
+  if(!salt){const row=await cloudFetchRow();salt=row?unb64bytes(row.salt):crypto.getRandomValues(new Uint8Array(16));}
+  const encrypted=await cloudEncryptDatabase(lifeosCloudKey,db);
+  const row={user_id:lifeosCloudSession.user.id,salt:b64bytes(salt),iv:encrypted.iv,ciphertext:encrypted.ciphertext,updated_at:new Date().toISOString()};
+  await sbRequest('/rest/v1/lifeos_vault?on_conflict=user_id','POST',row,true,'resolution=merge-duplicates,return=minimal');
+  document.getElementById('cloudStatus').textContent='Signed in · last encrypted sync '+new Date().toLocaleTimeString();
+ }catch(e){toast('Cloud sync failed: '+e.message)}
+ finally{lifeosCloudBusy=false}
+}
+function scheduleCloudSync(){clearTimeout(lifeosCloudTimer);lifeosCloudTimer=setTimeout(()=>cloudUpload().catch(()=>{}),1200);}
+async function cloudSignOut(){
+ lifeosCloudSession=null;lifeosCloudKey=null;localStorage.removeItem('lifeos_cloud_session_v1');updateCloudStatus();toast('Signed out. Local copy remains on this device.');
+}
+
+// Restore an existing session only as a signed-in marker. Password is required again to unlock encrypted cloud data.
+try{const saved=JSON.parse(localStorage.getItem('lifeos_cloud_session_v1')||'null');if(saved?.refresh_token){lifeosCloudSession=saved;updateCloudStatus();document.getElementById('cloudStatus').textContent='Session saved · enter your account password and sign in again to unlock encrypted cloud sync.';}}catch(e){}
+render('dashboard');
+</script></body></html>
